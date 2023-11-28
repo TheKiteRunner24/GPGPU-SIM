@@ -1848,17 +1848,7 @@ int gpgpu_sim::next_clock_domain(void) {
   return mask;
 }
 
-void gpgpu_sim::issue_block2core() {
-  unsigned last_issued = m_last_cluster_issue;
-  for (unsigned i = 0; i < m_shader_config->n_simt_clusters; i++) {
-    unsigned idx = (i + last_issued + 1) % m_shader_config->n_simt_clusters;
-    unsigned num = m_cluster[idx]->issue_block2core();
-    if (num) {
-      m_last_cluster_issue = idx;
-      m_total_cta_launched += num;
-    }
-  }
-}
+
 
 unsigned long long g_single_step =
     0;  // set this in gdb to single step the pipeline
