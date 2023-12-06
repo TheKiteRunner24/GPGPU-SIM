@@ -1705,7 +1705,7 @@ void shader_core_ctx::issue_block2core(kernel_info_t &kernel) {
   else
     assert(occupy_shader_resource_1block(kernel, true));
 
-  kernel.inc_running();
+  kernel.inc_running();  // m_num_cores_running++
 
   // find a free CTA context
   unsigned free_cta_hw_id = (unsigned)-1;
@@ -1716,7 +1716,7 @@ void shader_core_ctx::issue_block2core(kernel_info_t &kernel) {
   else
     max_cta_per_core = m_config->max_cta_per_core;
   for (unsigned i = 0; i < max_cta_per_core; i++) {
-    if (m_cta_status[i] == 0) {
+    if (m_cta_status[i] == 0) {  // unsigned m_cta_status[MAX_CTA_PER_SHADER];  // CTAs status
       free_cta_hw_id = i;
       break;
     }

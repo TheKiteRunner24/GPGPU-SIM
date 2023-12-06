@@ -546,7 +546,7 @@ void shader_core_ctx::init_warps(unsigned cta_id, unsigned start_thread,
         unsigned hwtid = i * m_config->warp_size + t;
         if (hwtid < end_thread) {
           n_active++;
-          assert(!m_active_threads.test(hwtid));
+          assert(!m_active_threads.test(hwtid)); // std::bitset<MAX_THREAD_PER_SM> m_active_threads;
           m_active_threads.set(hwtid);
           active_threads.set(t);
         }

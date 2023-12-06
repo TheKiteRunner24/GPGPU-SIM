@@ -2,7 +2,7 @@
 #include "gpu-sim.h"
 
 
-// select a cluster: RR
+// select a core: RR
 unsigned simt_core_cluster::issue_block2core() {
   unsigned num_blocks_issued = 0;
   for (unsigned i = 0; i < m_config->n_simt_cores_per_cluster; i++) {
@@ -22,7 +22,7 @@ unsigned simt_core_cluster::issue_block2core() {
       if (!m_gpu->kernel_more_cta_left(kernel)) {
         // wait till current kernel finishes
         if (m_core[core]->get_not_completed() == 0) {
-          kernel_info_t *k = m_gpu->select_kernel();
+          kernel_info_t *k = m_gpu->select_kernel();  // get a new kernel
           if (k) m_core[core]->set_kernel(k);
           kernel = k;
         }
@@ -42,7 +42,7 @@ unsigned simt_core_cluster::issue_block2core() {
   return num_blocks_issued;
 }
 
-// select a core: RR
+// select a cluster: RR
 void gpgpu_sim::issue_block2core() {
   unsigned last_issued = m_last_cluster_issue;
   for (unsigned i = 0; i < m_shader_config->n_simt_clusters; i++) {
