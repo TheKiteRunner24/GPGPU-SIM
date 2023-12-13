@@ -1,6 +1,6 @@
 #include "shader.h"
-#include "../../libcuda/gpgpu_context.h"
 #include "shader_trace.h"
+#include "../../libcuda/gpgpu_context.h"
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
@@ -571,5 +571,24 @@ void swl_scheduler::order_warps() {
   } else {
     fprintf(stderr, "swl_scheduler m_prioritization = %d\n", m_prioritization);
     abort();
+  }
+}
+
+// order warps, then put them into m_next_cycle_prioritized_warps
+// at each cycle, scheduler_unit::cycle() will select a valid warp from m_next_cycle_prioritized_warps sequentially
+void custom_scheduler::order_warps() {
+
+  int last_issued_warp_id = (*m_last_supervised_issued)->get_warp_id();
+  int *intra_warp_locality_score = m_shader->m_ldst_unit->m_L1D->m_intra_warp_locality_score;
+  
+  if(intra_warp_locality_score[last_issued_warp_id] > m_threshold) { // keep this warp running: gto
+    order_by_priority(m_next_cycle_prioritized_warps, m_supervised_warps,
+                    m_last_supervised_issued, m_supervised_warps.size(),
+                    ORDERING_GREEDY_THEN_PRIORITY_FUNC,
+                    scheduler_unit::sort_warps_by_oldest_dynamic_id);
+  }
+  else { // change another warp by rr
+    order_lrr(m_next_cycle_prioritized_warps, m_supervised_warps,
+          m_last_supervised_issued, m_supervised_warps.size());
   }
 }
